@@ -16,6 +16,7 @@ import { Roles } from '../decorator/roles.decorator';
 import { RolesGuard } from '../guards/webSocket/roles.guard';
 import { randomAvatar } from '../constant/functions/avatar.function';
 import { Context } from '../interfaces/socket.interface';
+import { WsThrottlerGuard } from '../guards/webSocket/ws-throttler.guard';
 
 @WebSocketGateway({
   cors: {
@@ -41,7 +42,7 @@ export class GroupGateway {
   @SubscribeMessage('createGroup')
   @Roles(['admin'])
   @UsePipes(new ValidationPipe({ transform: true }))
-  @UseGuards(RolesGuard)
+  @UseGuards(RolesGuard, WsThrottlerGuard)
   async createGroup(
     @MessageBody() ctx: Context<{ name: string }>,
     @ConnectedSocket() client: Socket,
