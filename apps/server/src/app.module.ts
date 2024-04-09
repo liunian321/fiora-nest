@@ -3,9 +3,11 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GatewayModule } from './gateways/gateway.module';
 import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from './guards/webSocket/roles.guard';
+import { AccessGuard } from './guards/webSocket/access.guard';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
+import { GroupModule } from './group/group.module';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -20,17 +22,19 @@ import { CacheModule } from '@nestjs/cache-manager';
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     GatewayModule,
+    GroupModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
         limit: 5,
       },
     ]),
+    MessageModule,
   ],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: AccessGuard,
     },
   ],
 })

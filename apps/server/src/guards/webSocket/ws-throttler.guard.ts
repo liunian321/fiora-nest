@@ -13,10 +13,11 @@ import { Model } from 'mongoose';
 import { UserDocument } from '../../database/schemas/user.schema';
 import { isEmpty } from 'lodash';
 import { ConfigService } from '@nestjs/config';
+import { WsException } from '@nestjs/websockets';
 
 /**
  * 限流守卫
- * 由于限流的是 webSocket 所以无法设置为全局限流
+ * 由于是 webSocketGuard 所以无法设置为全局守卫
  */
 @Injectable()
 export class WsThrottlerGuard extends ThrottlerGuard {
@@ -51,7 +52,7 @@ export class WsThrottlerGuard extends ThrottlerGuard {
     const userId: string = client.data.user;
     const user = await this.userModel.findOne({ _id: userId });
     if (isEmpty(user)) {
-      throw new ThrottlerException('用户不存在！');
+      throw new WsException('用户不存在！');
     }
 
     const isNewUser =

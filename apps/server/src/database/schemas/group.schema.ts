@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { NAME_OPTION } from '../constant/prop.option';
+import { HydratedDocument } from 'mongoose';
 
-export type GroupDocument = Group & Document;
+export type GroupDocument = HydratedDocument<Group>;
 
 @Schema()
 export class Group {
@@ -11,11 +12,11 @@ export class Group {
   name: string;
 
   /** 头像 */
-  @Prop()
+  @Prop({ type: String })
   avatar: string;
 
   /** 公告 */
-  @Prop({ default: '' })
+  @Prop({ type: String, default: '' })
   announcement: string;
 
   /** 创建者 */
@@ -23,7 +24,7 @@ export class Group {
   creator: string;
 
   /** 是否为默认群组 */
-  @Prop()
+  @Prop({ type: Boolean, default: false })
   isDefault: boolean;
 
   /** 成员 */
@@ -31,11 +32,11 @@ export class Group {
   memberIds: string[];
 
   /** 创建时间 */
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   createTime: Date;
 
   /** 更新时间 */
-  @Prop()
+  @Prop({ type: Date })
   updateTime: Date;
 }
 
