@@ -109,7 +109,7 @@ export class UserGateway {
     await this.groupProvider.updateGroup(defaultGroup.id, defaultGroup);
 
     // 颁发 token
-    const token = this.jwtService.sign({ userId: newUser.id });
+    const token = await this.jwtService.signAsync({ userId: newUser.id });
     ctx.socket.user = newUser.id;
 
     // TODO: 后续这个操作迁移到 User-Info 模块中

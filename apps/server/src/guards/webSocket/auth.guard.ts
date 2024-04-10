@@ -1,5 +1,4 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { Socket } from 'socket.io';
 import { WsException } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
@@ -13,9 +12,7 @@ export class AuthGuard implements CanActivate {
     private readonly configService: ConfigService,
   ) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const socket: Socket = context.switchToWs().getClient();
     const headers = socket.handshake.headers;
     const token = this.extractTokenFromHeader(headers);
@@ -26,7 +23,7 @@ export class AuthGuard implements CanActivate {
 
     const secret = this.configService.get('TOKEN_SECRET');
     try {
-      const payload = this.jwtService.verify(token, {
+      const payload = await this.jwtService.verifyAsync(token, {
         secret,
       });
       socket.data.user = payload.userId;
