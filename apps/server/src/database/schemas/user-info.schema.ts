@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
-export type SocketDocument = Socket & Document;
+export type UserInfoDocument = HydratedDocument<UserInfo>;
 
 @Schema()
-export class Socket {
+export class UserInfo {
   /** socket连接id */
   @Prop({ unique: true, index: true })
   id: string;
@@ -38,4 +38,4 @@ export class Socket {
   updateTime: Date;
 }
 
-export const SocketSchema = SchemaFactory.createForClass(Socket);
+export const UserInfoSchema = SchemaFactory.createForClass(UserInfo);

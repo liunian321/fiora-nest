@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { Group } from '../database/schemas/group.schema';
+import { Group, GroupDocument } from '../database/schemas/group.schema';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -30,6 +30,13 @@ export class GroupProvider {
    */
   async getGroupById(id: string): Promise<Group> {
     return await this.groupModel.findOne({ _id: id }).exec();
+  }
+
+  /**
+   * 获取默认群组
+   */
+  async getDefaultGroup(): Promise<GroupDocument | null> {
+    return await this.groupModel.findOne({ isDefault: true }).exec();
   }
 
   /**

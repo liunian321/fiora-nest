@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConnectionGateway } from './connection.gateway';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Socket, SocketSchema } from '../database/schemas/socket.schema';
+import { UserInfo, UserInfoSchema } from '../database/schemas/user-info.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Socket.name, schema: SocketSchema }]),
+    MongooseModule.forFeature([
+      { name: UserInfo.name, schema: UserInfoSchema },
+    ]),
   ],
   providers: [ConnectionGateway],
 })

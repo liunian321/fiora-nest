@@ -11,5 +11,6 @@ import { Group, GroupSchema } from '../database/schemas/group.schema';
     MongooseModule.forFeature([{ name: Group.name, schema: GroupSchema }]),
   ],
   providers: [GroupGateway, GroupProvider],
+  exports: [GroupProvider],
 })
 export class GroupModule {}

@@ -7,7 +7,10 @@ import { Socket } from 'socket.io';
 import { getSocketIp } from '../constant';
 import { Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SocketDocument } from '../database/schemas/socket.schema';
+import {
+  UserInfo,
+  UserInfoDocument,
+} from '../database/schemas/user-info.schema';
 import { Model } from 'mongoose';
 import * as groupRoutes from '../group/group.gateway';
 import assert from 'assert';
@@ -24,20 +27,20 @@ export class ConnectionGateway
   logger: Logger = new Logger(ConnectionGateway.name);
 
   constructor(
-    @InjectModel(Socket.name)
-    private readonly socketModel: Model<SocketDocument>,
+    @InjectModel(UserInfo.name)
+    private readonly userInfoDocumentModel: Model<UserInfoDocument>,
   ) {}
 
   async handleDisconnect(client: Socket) {
     this.logger.log(`客户端 ${getSocketIp(client)} 断开连接`);
-    await this.socketModel.deleteOne({ socketId: client.id });
+    await this.userInfoDocumentModel.deleteOne({ socketId: client.id });
   }
 
   async handleConnection(client: Socket) {
     const ip = getSocketIp(client);
     this.logger.log(`客户端 ${ip} 连接成功`);
 
-    await this.socketModel.create({
+    await this.userInfoDocumentModel.create({
       ip,
       socketId: client.id,
     });
