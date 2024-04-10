@@ -8,6 +8,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { GroupModule } from './group/group.module';
 import { MessageModule } from './message/message.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -30,6 +31,13 @@ import { MessageModule } from './message/message.module';
       },
     ]),
     MessageModule,
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get('DATABASE_URI'),
+      }),
+      inject: [ConfigService],
+    }),
   ],
   providers: [
     {

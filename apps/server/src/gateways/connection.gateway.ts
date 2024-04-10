@@ -24,7 +24,8 @@ export class ConnectionGateway
   logger: Logger = new Logger(ConnectionGateway.name);
 
   constructor(
-    @InjectModel('Socket') private readonly socketModel: Model<SocketDocument>,
+    @InjectModel(Socket.name)
+    private readonly socketModel: Model<SocketDocument>,
   ) {}
 
   async handleDisconnect(client: Socket) {

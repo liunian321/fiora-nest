@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { NAME_OPTION } from '../constant/prop.option';
+import { NAME_OPTION } from '../constant/prop.options';
 
 export type UserDocument = User & Document;
 
