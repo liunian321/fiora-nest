@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { FilterQuery, Model, ProjectionType, QueryOptions } from 'mongoose';
 import { Group, GroupDocument } from '../database/schemas/group.schema';
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -8,6 +8,14 @@ export class GroupProvider {
   constructor(
     @InjectModel(Group.name) private readonly groupModel: Model<Group>,
   ) {}
+
+  async findGroupByCondition(
+    filter: FilterQuery<GroupDocument>,
+    projection?: ProjectionType<GroupDocument> | null | undefined,
+    options?: QueryOptions<GroupDocument> | null | undefined,
+  ): Promise<GroupDocument[]> {
+    return await this.groupModel.find(filter, projection, options).exec();
+  }
 
   /**
    * 创建群组

@@ -12,6 +12,9 @@ export class Notification {
   // 用户
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   userId: string;
+
+  @Prop({ type: String, unique: true })
+  token: string;
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);
