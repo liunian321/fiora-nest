@@ -2,7 +2,7 @@ version: '3.8'
 services:
   mongodb:
     image: mongo:latest
-    container_name: mongodb
+    container_name: "fiora-nest"
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root

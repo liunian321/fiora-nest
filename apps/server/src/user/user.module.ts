@@ -6,6 +6,7 @@ import { GroupModule } from '../group/group.module';
 import {
   Friend,
   FriendSchema,
+  Notification,
   NotificationSchema,
   User,
   UserInfo,

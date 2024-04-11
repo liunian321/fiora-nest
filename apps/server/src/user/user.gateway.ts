@@ -25,6 +25,7 @@ import { ONE_DAY } from '../constant/base.constant';
 import {
   Friend,
   FriendDocument,
+  Notification,
   NotificationDocument,
   User,
   UserDocument,

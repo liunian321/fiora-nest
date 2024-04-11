@@ -137,4 +137,60 @@ export class GroupGateway {
       messages,
     };
   }
+
+  /**
+   * 退出群组
+   * @param ctx
+   */
+  @SubscribeMessage('leaveGroup')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(AccessGuard, WsThrottlerGuard)
+  async leaveGroup(ctx: Context<{ groupId: string }>) {
+    const group: Group = await this.groupModel
+      .findOne({ _id: ctx.data.groupId })
+      .exec();
+
+    if (!group) {
+      throw new WsException('群组不存在~');
+    }
+
+    if (!group.memberIds.includes(ctx.socket.user)) {
+      throw new WsException('你不在群组中~');
+    }
+
+    if (group.creator === ctx.socket.user) {
+      throw new WsException('群主不可以退出自己创建的群~');
+    }
+
+    const memberSet = new Set(group.memberIds);
+
+    // 不存在要退出的群组
+    if (!memberSet.has(ctx.socket.user)) {
+      throw new WsException('你不在该群组中~');
+    } else {
+      memberSet.delete(ctx.socket.user);
+    }
+
+    group.memberIds = Array.from(memberSet);
+    await this.groupModel.updateOne({ _id: ctx.data.groupId }, group).exec();
+
+    ctx.socket.leave(ctx.data.groupId);
+
+    return {};
+  }
+
+  /**
+   * 获取群组在线成员
+   */
+  @SubscribeMessage('getGroupOnlineMembers')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(AccessGuard, WsThrottlerGuard)
+  async getGroupOnlineMembers(ctx: Context<{ groupId: string }>) {
+    const clients = this.server.sockets.adapter.rooms.get(ctx.data.groupId);
+    if (!clients) {
+      return [];
+    }
+
+    return Array.from(clients);
+  }
 }
