@@ -3,3 +3,8 @@ export const NAME_REGEXP =
 
 /** 一天时间 */
 export const ONE_DAY = 1000 * 60 * 60 * 24;
+
+/**
+ * 项目名称
+ */
+export const PROJECT_NAME = 'fiora-nest';

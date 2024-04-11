@@ -10,7 +10,7 @@ import { Socket } from 'socket.io';
 import { Reflector } from '@nestjs/core';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UserDocument } from '../../database/schemas/user.schema';
+import { UserDocument } from '../../database/schemas';
 import { isEmpty } from 'lodash';
 import { ConfigService } from '@nestjs/config';
 import { WsException } from '@nestjs/websockets';

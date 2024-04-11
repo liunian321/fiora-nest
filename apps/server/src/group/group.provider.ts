@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FilterQuery, Model, ProjectionType, QueryOptions } from 'mongoose';
-import { Group, GroupDocument } from '../database/schemas/group.schema';
+import { Group, GroupDocument } from '../database/schemas';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()

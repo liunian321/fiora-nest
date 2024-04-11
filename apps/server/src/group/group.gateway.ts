@@ -11,14 +11,12 @@ import { Logger, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Group } from '../database/schemas/group.schema';
-import { Roles } from '../decorator/roles.decorator';
-import { AccessGuard } from '../guards/webSocket/access.guard';
-import { randomAvatar } from '../constant';
-import { Context } from '../interfaces/socket.interface';
-import { WsThrottlerGuard } from '../guards/webSocket/ws-throttler.guard';
+import { Group, Message } from '../database/schemas';
 import { MessageProvider } from '../message/message.provider';
-import { Message } from '../database/schemas/message.schema';
+import { Roles } from '../decorator/roles.decorator';
+import { AccessGuard, WsThrottlerGuard } from '../guards/webSocket';
+import { Context } from '../interfaces/socket.interface';
+import { randomAvatar } from '../constant';
 
 @WebSocketGateway({
   cors: {

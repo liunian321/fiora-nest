@@ -3,12 +3,13 @@ import { UserGateway } from './user.gateway';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from 'src/database/schemas/user.schema';
 import { GroupModule } from '../group/group.module';
-import { UserInfo, UserInfoSchema } from '../database/schemas/user-info.schema';
 import {
-  Notification,
+  Friend,
+  FriendSchema,
   NotificationSchema,
-} from '../database/schemas/notification.schema';
-import { Friend, FriendSchema } from '../database/schemas/friend.schema';
+  UserInfo,
+  UserInfoSchema,
+} from '../database/schemas';
 
 @Module({
   imports: [

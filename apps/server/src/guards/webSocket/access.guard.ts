@@ -9,7 +9,7 @@ import { Roles } from '../../decorator/roles.decorator';
 import { ConfigService } from '@nestjs/config';
 import { WsException } from '@nestjs/websockets';
 import { isEmpty } from 'lodash';
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { getSealIpKey, getSealUserKey } from '../../constant';
 
 /**

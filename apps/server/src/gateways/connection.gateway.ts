@@ -7,10 +7,7 @@ import { Socket } from 'socket.io';
 import { getSocketIp } from '../constant';
 import { Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  UserInfo,
-  UserInfoDocument,
-} from '../database/schemas/user-info.schema';
+import { UserInfo, UserInfoDocument } from '../database/schemas';
 import { Model } from 'mongoose';
 import * as groupRoutes from '../group/group.gateway';
 import assert from 'assert';
