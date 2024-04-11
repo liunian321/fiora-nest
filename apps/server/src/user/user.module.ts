@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
-import { UserGateway } from './user.gateway';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from 'src/database/schemas/user.schema';
+
+import { UserGateway } from './user.gateway';
 import { GroupModule } from '../group/group.module';
 import {
   Friend,
   FriendSchema,
   NotificationSchema,
+  User,
   UserInfo,
   UserInfoSchema,
+  UserSchema,
 } from '../database/schemas';
 
 @Module({

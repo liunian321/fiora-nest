@@ -1,16 +1,18 @@
+import assert from 'assert';
+
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { getSocketIp } from '../constant';
 import { Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserInfo, UserInfoDocument } from '../database/schemas';
 import { Model } from 'mongoose';
+
+import { UserInfo, UserInfoDocument } from '../database/schemas';
+import { getSocketIp } from '../constant';
 import * as groupRoutes from '../group/group.gateway';
-import assert from 'assert';
 import { Context } from '../interfaces/socket.interface';
 
 @WebSocketGateway({

@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { HydratedDocument } from 'mongoose';
+
 import { NAME_OPTION } from '../constant/prop.options';
 
 export type GroupDocument = HydratedDocument<Group>;

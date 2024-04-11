@@ -1,5 +1,6 @@
-import { NAME_REGEXP } from '../../constant/base.constant';
 import { PropOptions } from '@nestjs/mongoose';
+
+import { NAME_REGEXP } from '../../constant/base.constant';
 
 export const NAME_OPTION: PropOptions = {
   required: true,

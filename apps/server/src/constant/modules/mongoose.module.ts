@@ -1,7 +1,8 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PROJECT_NAME } from '../base.constant';
 import ms from 'ms';
+
+import { PROJECT_NAME } from '../base.constant';
 
 export const MongooseForRootAsyncModule = MongooseModule.forRootAsync({
   imports: [ConfigModule],

@@ -5,11 +5,12 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Roles } from '../../decorator/roles.decorator';
 import { ConfigService } from '@nestjs/config';
 import { WsException } from '@nestjs/websockets';
 import { isEmpty } from 'lodash';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+
+import { Roles } from '../../decorator/roles.decorator';
 import { getSealIpKey, getSealUserKey } from '../../constant';
 
 /**
@@ -27,9 +28,11 @@ export class AccessGuard implements CanActivate {
     const roles = this.reflector.get(Roles, context.getHandler());
 
     if (context.getType() === 'http') {
+      // should to do something~
     } else if (context.getType() === 'ws') {
       return await this.webSocket(context, roles);
     } else if (context.getType() === 'rpc') {
+      // should to do something~
     } else {
       // 如果请求是未知类型，则拒绝访问
       throw new WsException('未知请求类型');
@@ -60,7 +63,6 @@ export class AccessGuard implements CanActivate {
         .split(',');
 
       // 如果接口需要 admin 角色，且用户是 admin 用户，则允许访问
-
       const include = adminUsers.includes(userId);
       if (!include) {
         throw new WsException('无权访问');

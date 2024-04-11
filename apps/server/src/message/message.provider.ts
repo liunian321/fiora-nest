@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { FilterQuery, Model, ProjectionType, QueryOptions } from 'mongoose';
-import { Message } from '../database/schemas';
 import { InjectModel } from '@nestjs/mongoose';
+
+import { Message } from '../database/schemas';
 
 @Injectable()
 export class MessageProvider {

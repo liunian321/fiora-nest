@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AccessGuard, AuthGuard, WsThrottlerGuard } from './webSocket';
 import { MongooseModule } from '@nestjs/mongoose';
+
+import { AccessGuard, AuthGuard, WsThrottlerGuard } from './webSocket';
 import { User, UserSchema } from '../database/schemas';
 
 @Module({

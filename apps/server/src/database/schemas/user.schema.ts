@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { NAME_OPTION } from '../constant/prop.options';
 import { HydratedDocument } from 'mongoose';
+
+import { NAME_OPTION } from '../constant/prop.options';
 
 export type UserDocument = HydratedDocument<User>;
 

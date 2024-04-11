@@ -1,9 +1,10 @@
+import { IncomingHttpHeaders } from 'http';
+
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { WsException } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { IncomingHttpHeaders } from 'http';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

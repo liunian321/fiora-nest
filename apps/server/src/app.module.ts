@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+
 import { GatewayModule } from './gateways/gateway.module';
 import { GroupModule } from './group/group.module';
 import { MessageModule } from './message/message.module';

@@ -7,30 +7,30 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { User, UserDocument } from '../database/schemas/user.schema';
 import { Inject, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import * as bcrypt from 'bcrypt';
+import { isEmpty } from 'lodash';
+import { JwtService } from '@nestjs/jwt';
+
 import { Context } from '../interfaces/socket.interface';
 import { Environment } from './interfaces/user.interface';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   getNewRegisteredUserIpKey,
   getNewUserKey,
   randomAvatar,
 } from '../constant';
 import { GroupProvider } from '../group/group.provider';
-import * as bcrypt from 'bcrypt';
 import { ONE_DAY } from '../constant/base.constant';
-import { isEmpty } from 'lodash';
-import { JwtService } from '@nestjs/jwt';
 import {
+  Friend,
+  FriendDocument,
+  NotificationDocument,
+  User,
+  UserDocument,
   UserInfo,
   UserInfoDocument,
-} from '../database/schemas/user-info.schema';
-import { Friend, FriendDocument } from '../database/schemas/friend.schema';
-import {
-  Notification,
-  NotificationDocument,
-} from '../database/schemas/notification.schema';
+} from '../database/schemas';
 
 @WebSocketGateway({
   cors: {
