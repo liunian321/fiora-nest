@@ -7,7 +7,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { Inject, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Inject,
+  Logger,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import * as bcrypt from 'bcrypt';
 import { isEmpty } from 'lodash';
@@ -32,6 +38,7 @@ import {
   UserInfo,
   UserInfoDocument,
 } from '../database/schemas';
+import { WsThrottlerGuard } from '../guards/webSocket';
 
 @WebSocketGateway({
   cors: {
@@ -56,6 +63,10 @@ export class UserGateway {
 
   logger: Logger = new Logger(UserGateway.name);
 
+  /**
+   * 注册
+   * @param ctx
+   */
   @SubscribeMessage('register')
   @UsePipes(new ValidationPipe({ transform: true }))
   async register(
@@ -177,7 +188,7 @@ export class UserGateway {
   /**
    * 账号密码登录
    */
-  @SubscribeMessage('register')
+  @SubscribeMessage('login')
   @UsePipes(new ValidationPipe({ transform: true }))
   async login(
     @MessageBody()
@@ -281,6 +292,79 @@ export class UserGateway {
         await session.endSession();
       }
     });
+  }
+
+  /**
+   * 修改密码
+   */
+  @SubscribeMessage('changePassword')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(WsThrottlerGuard)
+  async changePassword(
+    @MessageBody()
+    ctx: Context<{ oldPassword: string; newPassword: string }>,
+  ) {
+    const user = await this.userModel.findOne({ _id: ctx.socket.user });
+    if (!user) {
+      throw new WsException('用户不存在');
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(
+      ctx.data.oldPassword,
+      user.salt,
+    );
+    if (!isPasswordCorrect) {
+      throw new WsException('旧密码错误');
+    }
+
+    const saltRounds = parseInt(
+      this.configService.get<string>('SALT_ROUNDS', '10'),
+    );
+
+    const hashedPassword = await bcrypt.hash(ctx.data.newPassword, saltRounds);
+
+    await this.userModel.updateOne(
+      {
+        _id: ctx.socket.user,
+      },
+      {
+        password: hashedPassword,
+        salt: saltRounds,
+      },
+    );
+
+    return true;
+  }
+
+  /**
+   * 修改用户名
+   */
+  @SubscribeMessage('changeUsername')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(WsThrottlerGuard)
+  async changeUsername(@MessageBody() ctx: Context<{ username: string }>) {
+    const user = await this.userModel.findOne({ _id: ctx.socket.user });
+    if (!user) {
+      throw new WsException('用户不存在');
+    }
+
+    const isUsernameExist = await this.userModel.findOne({
+      username: ctx.data.username,
+    });
+    if (isUsernameExist) {
+      throw new WsException('用户名已存在');
+    }
+
+    await this.userModel.updateOne(
+      {
+        _id: ctx.socket.user,
+      },
+      {
+        username: ctx.data.username,
+      },
+    );
+
+    return true;
   }
 
   /**

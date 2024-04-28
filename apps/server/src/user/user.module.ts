@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserGateway } from './user.gateway';
@@ -13,6 +13,7 @@ import {
   UserInfoSchema,
   UserSchema,
 } from '../database/schemas';
+import { UserProvider } from './user.provider';
 
 @Module({
   imports: [
@@ -22,9 +23,9 @@ import {
       { name: Notification.name, schema: NotificationSchema },
       { name: Friend.name, schema: FriendSchema },
     ]),
-    GroupModule,
+    forwardRef(() => GroupModule),
   ],
-  providers: [UserGateway],
-  exports: [],
+  providers: [UserGateway, UserProvider],
+  exports: [UserProvider],
 })
 export class UserModule {}

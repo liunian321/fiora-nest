@@ -52,7 +52,7 @@ export class WsThrottlerGuard extends ThrottlerGuard {
     const userId: string = client.data.user;
     const user = await this.userModel.findOne({ _id: userId });
     if (isEmpty(user)) {
-      throw new WsException('用户不存在！');
+      throw new WsException('请先登录');
     }
 
     const isNewUser =

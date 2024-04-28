@@ -18,6 +18,14 @@ export class GroupProvider {
     return await this.groupModel.find(filter, projection, options).exec();
   }
 
+  async findOneGroupByCondition(
+    filter: FilterQuery<GroupDocument>,
+    projection?: ProjectionType<GroupDocument> | null | undefined,
+    options?: QueryOptions<GroupDocument> | null | undefined,
+  ): Promise<GroupDocument | null> {
+    return await this.groupModel.findOne(filter, projection, options).exec();
+  }
+
   /**
    * 创建群组
    * @param group

@@ -93,7 +93,7 @@ export class GroupGateway {
   @SubscribeMessage('joinGroup')
   @UsePipes(new ValidationPipe({ transform: true }))
   @UseGuards(AccessGuard, WsThrottlerGuard)
-  async joinGroup(ctx: Context<{ groupId: string }>) {
+  async joinGroup(@MessageBody() ctx: Context<{ groupId: string }>) {
     const group: Group = await this.groupModel
       .findOne({ _id: ctx.data.groupId })
       .exec();
@@ -145,7 +145,7 @@ export class GroupGateway {
   @SubscribeMessage('leaveGroup')
   @UsePipes(new ValidationPipe({ transform: true }))
   @UseGuards(AccessGuard, WsThrottlerGuard)
-  async leaveGroup(ctx: Context<{ groupId: string }>) {
+  async leaveGroup(@MessageBody() ctx: Context<{ groupId: string }>) {
     const group: Group = await this.groupModel
       .findOne({ _id: ctx.data.groupId })
       .exec();
@@ -185,12 +185,137 @@ export class GroupGateway {
   @SubscribeMessage('getGroupOnlineMembers')
   @UsePipes(new ValidationPipe({ transform: true }))
   @UseGuards(AccessGuard, WsThrottlerGuard)
-  async getGroupOnlineMembers(ctx: Context<{ groupId: string }>) {
-    const clients = this.server.sockets.adapter.rooms.get(ctx.data.groupId);
-    if (!clients) {
+  async getGroupOnlineMembers(
+    @MessageBody() input: { data: { groupId: string } },
+    @ConnectedSocket() client: Socket,
+  ) {
+    // 从 socket.io 中获取在线成员
+    const onlineMembers = this.server.sockets.adapter.rooms.get(
+      input.data.groupId,
+    );
+
+    if (!onlineMembers) {
       return [];
     }
 
-    return Array.from(clients);
+    // 从在线成员中排除自己
+    onlineMembers.delete(client.id);
+
+    return Array.from(onlineMembers);
+  }
+
+  /**
+   * 获取默认群组的在线成员
+   */
+  @SubscribeMessage('getDefaultGroupOnlineMembers')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(AccessGuard, WsThrottlerGuard)
+  async getDefaultGroupOnlineMembers(@ConnectedSocket() client: Socket) {
+    const group = await this.groupModel.findOne({ isDefault: true }).exec();
+    if (!group) {
+      throw new WsException('群组不存在');
+    }
+
+    return this.getGroupOnlineMembers({ data: { groupId: group.id } }, client);
+  }
+
+  /**
+   * 修改群组信息
+   */
+  @SubscribeMessage('changeGroupInfo')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(AccessGuard, WsThrottlerGuard)
+  async changeGroupInfo(
+    @MessageBody()
+    ctx: Context<{ groupId: string; name?: string; avatar?: string }>,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const group = await this.groupModel
+      .findOne({ _id: ctx.data.groupId })
+      .exec();
+    if (!group) {
+      throw new WsException('群组不存在');
+    }
+
+    if (group.creator.toString() !== ctx.socket.user.toString()) {
+      throw new WsException('只有群主才能修改群信息');
+    }
+
+    const updateData: Partial<Group> = {};
+    if (ctx.data.name) {
+      updateData.name = ctx.data.name;
+    }
+    if (ctx.data.avatar) {
+      updateData.avatar = ctx.data.avatar;
+    }
+
+    const updateResult = await this.groupModel
+      .updateOne({ _id: ctx.data.groupId }, updateData)
+      .exec();
+
+    // 没有修改成功
+    if (updateResult.modifiedCount === 0) {
+      throw new WsException('修改群组名称失败');
+    }
+
+    return {};
+  }
+
+  /**
+   * 删除群组
+   */
+  @SubscribeMessage('deleteGroup')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(AccessGuard, WsThrottlerGuard)
+  async deleteGroup(
+    @MessageBody() ctx: Context<{ groupId: string }>,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { groupId } = ctx.data;
+
+    const group = await this.groupModel
+      .findOne({
+        _id: groupId,
+        isDefault: false,
+        creator: {
+          $eq: ctx.socket.user,
+        },
+      })
+      .exec();
+
+    // 如果删除的是默认的群组并且不是管理员
+    if (!group) {
+      throw new WsException('您无法删除该群组');
+    }
+
+    await this.groupModel.deleteOne({ _id: groupId }).exec();
+
+    client.to(groupId).emit('deleteGroup', { groupId });
+
+    return {};
+  }
+
+  /**
+   * 获取群组基本信息
+   */
+  @SubscribeMessage('getGroupBasicInfo')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(AccessGuard, WsThrottlerGuard)
+  async getGroupBasicInfo(@MessageBody() ctx: Context<{ groupId: string }>) {
+    const group = await this.groupModel
+      .findOne({ _id: ctx.data.groupId })
+      .exec();
+    if (!group) {
+      throw new WsException('群组不存在');
+    }
+
+    return {
+      _id: ctx.data.groupId,
+      name: group.name,
+      avatar: group.avatar,
+      createTime: group.createTime,
+      creator: group.creator,
+      hasMemberCount: group.memberIds.length,
+    };
   }
 }
