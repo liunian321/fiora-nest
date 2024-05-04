@@ -17,7 +17,7 @@ import {
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { clone } from 'lodash';
+import { clone, isEmpty } from 'lodash';
 import { Expo, ExpoPushErrorTicket } from 'expo-server-sdk';
 
 import { WsThrottlerGuard } from '../guards/webSocket';
@@ -43,6 +43,7 @@ import {
 } from '../database/schemas';
 import { GroupProvider } from '../group/group.provider';
 import { UserProvider } from '../user/user.provider';
+import { ObjectUtil } from '../utils/object.util';
 
 @WebSocketGateway({
   cors: {
@@ -101,7 +102,7 @@ export class MessageGateway {
       }
     }
 
-    const toGroup = await this.groupProvider.findOneGroupByCondition({
+    const toGroup = await this.groupProvider.findGroupByCondition({
       _id: ctx.data.to,
     });
     if (!toGroup) {
@@ -158,11 +159,9 @@ export class MessageGateway {
 
       messageContent = ctx.data.content;
     } else if (type === 'inviteV2') {
-      const shareTargetGroup = await this.groupProvider.findOneGroupByCondition(
-        {
-          _id: ctx.data.content,
-        },
-      );
+      const shareTargetGroup = await this.groupProvider.findGroupByCondition({
+        _id: ctx.data.content,
+      });
       if (!shareTargetGroup) {
         throw new AssertionError({ message: '目标群组不存在' });
       }
@@ -302,7 +301,7 @@ export class MessageGateway {
           this.userProvider.findOneUserByCondition({
             _id: inviteInfo!.inviter,
           }),
-          this.groupProvider.findOneGroupByCondition({
+          this.groupProvider.findGroupByCondition({
             _id: inviteInfo!.group,
           }),
         ]);
@@ -317,6 +316,109 @@ export class MessageGateway {
         }
       }
     }
+  }
+
+  async handleInviteV2Messages(messages: Message[]): Promise<Message[]> {
+    const inviters: string[] = [];
+    const groups: string[] = [];
+
+    messages.map((message) => {
+      if (message.type !== 'inviteV2') {
+        return false;
+      }
+
+      const inviteInfo = JSON.parse(message.content);
+      if (
+        Object.hasOwn(inviteInfo, 'inviter') &&
+        Object.hasOwn(inviteInfo, 'group')
+      ) {
+        inviters.push(inviteInfo.inviter);
+        groups.push(inviteInfo.group);
+        return true;
+      }
+
+      return false;
+    });
+
+    const users = await this.userProvider.findUsersByCondition({
+      filter: {
+        _id: {
+          $in: inviters,
+        },
+      },
+    });
+
+    const groupList = await this.groupProvider.findGroupsByCondition({
+      _id: {
+        $in: groups,
+      },
+      memberIds: {
+        $in: inviters,
+      },
+    });
+
+    const userMap = ObjectUtil.listToMap(users, '_id');
+    const groupMap = ObjectUtil.listToMap(groupList, '_id');
+    for (const message of messages) {
+      const inviteInfo = JSON.parse(message.content);
+      if (!inviteInfo) {
+        continue;
+      }
+
+      const user = userMap.get(inviteInfo.inviter);
+      const group = groupMap.get(inviteInfo.group);
+      if (user && group) {
+        Object.assign(inviteInfo, {
+          inviterName: user.username,
+          groupName: group.name,
+        });
+
+        message.content = JSON.stringify(inviteInfo);
+      }
+    }
+
+    return messages;
+  }
+
+  /**
+   * 获取一组联系人的最后历史消息
+   */
+  async getLastHistoryMessage(ctx: Context<{ linkmans: string[] }>) {
+    if (isEmpty(ctx.data.linkmans)) {
+      throw new WsException('联系人不能为空');
+    }
+
+    const linkmanMessages: {
+      [linkmanId: string]: Message[];
+    } = {};
+
+    for (const linkman of ctx.data.linkmans) {
+      const messages = await this.messageModel
+        .find(
+          {
+            to: linkman,
+          },
+          {
+            type: 1,
+            content: 1,
+            from: 1,
+            createTime: 1,
+            deleted: 1,
+          },
+          {
+            sort: { createTime: -1 },
+            limit: parseInt(
+              this.configService.get('HISTORY_MESSAGE_COUNT'),
+              10,
+            ),
+          },
+        )
+        .exec();
+
+      linkmanMessages[linkman] = await this.handleInviteV2Messages(messages);
+    }
+
+    return linkmanMessages;
   }
 
   /**

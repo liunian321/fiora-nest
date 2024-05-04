@@ -35,12 +35,16 @@ export class UserProvider {
     return await this.userModel.findOne(filter, projection, options).exec();
   }
 
-  async findUserByCondition(
-    filter?: FilterQuery<User>,
-    projection?: ProjectionType<User>,
-    options?: QueryOptions<User>,
-  ) {
-    return await this.userModel.find(filter, projection, options).exec();
+  async findUsersByCondition(data: {
+    filter?: FilterQuery<User>;
+    projection?: ProjectionType<User>;
+    options?: QueryOptions<User>;
+    sort?: any;
+  }) {
+    return await this.userModel
+      .find(data.filter, data.projection, data.options)
+      .sort(data.sort)
+      .exec();
   }
 
   async getUserById(id: string) {

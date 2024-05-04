@@ -10,7 +10,7 @@ export class GroupProvider {
     @InjectModel(Group.name) private readonly groupModel: Model<Group>,
   ) {}
 
-  async findGroupByCondition(
+  async findGroupsByCondition(
     filter: FilterQuery<GroupDocument>,
     projection?: ProjectionType<GroupDocument> | null | undefined,
     options?: QueryOptions<GroupDocument> | null | undefined,
@@ -18,7 +18,7 @@ export class GroupProvider {
     return await this.groupModel.find(filter, projection, options).exec();
   }
 
-  async findOneGroupByCondition(
+  async findGroupByCondition(
     filter: FilterQuery<GroupDocument>,
     projection?: ProjectionType<GroupDocument> | null | undefined,
     options?: QueryOptions<GroupDocument> | null | undefined,

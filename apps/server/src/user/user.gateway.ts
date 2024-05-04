@@ -215,7 +215,7 @@ export class UserGateway {
         user.lastLoginTime = new Date();
         await this.userModel.updateOne({ _id: user._id }, user);
 
-        const groups = await this.groupProvider.findGroupByCondition(
+        const groups = await this.groupProvider.findGroupsByCondition(
           {
             memberIds: {
               $in: [user.id],
