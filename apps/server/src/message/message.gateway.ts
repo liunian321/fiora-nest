@@ -26,6 +26,7 @@ import { SendMessageData } from './interfaces/message.interface';
 import {
   DisableNewUserSendMessageKey,
   DisableSendMessageKey,
+  EachFetchMessagesCount,
   OneYear,
   RPS,
 } from '../constant/base.constant';
@@ -290,7 +291,7 @@ export class MessageGateway {
    * 处理邀请消息
    * @param message
    */
-  async handleInviteV2Message(message: SendMessageData) {
+  private async handleInviteV2Message(message: SendMessageData) {
     if (message.type === 'inviteV2') {
       const inviteInfo = JSON.parse(message.content);
       if (
@@ -318,7 +319,9 @@ export class MessageGateway {
     }
   }
 
-  async handleInviteV2Messages(messages: Message[]): Promise<Message[]> {
+  private async handleInviteV2Messages(
+    messages: Message[],
+  ): Promise<Message[]> {
     const inviters: string[] = [];
     const groups: string[] = [];
 
@@ -381,9 +384,47 @@ export class MessageGateway {
   }
 
   /**
+   * 获取联系人的历史消息
+   * @param ctx Context
+   */
+  @SubscribeMessage('getLinkmanHistoryMessages')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(WsThrottlerGuard)
+  async getLinkmanHistoryMessages(
+    @MessageBody() ctx: Context<{ linkmanId: string; existCount: number }>,
+  ) {
+    const { linkmanId, existCount } = ctx.data;
+
+    const messages = await this.messageModel
+      .find(
+        { to: linkmanId },
+        {
+          type: 1,
+          content: 1,
+          from: 1,
+          createTime: 1,
+          deleted: 1,
+        },
+        {
+          sort: { createTime: -1 },
+          limit: EachFetchMessagesCount + existCount,
+        },
+      )
+      .populate('from', { username: 1, avatar: 1, tag: 1 });
+    await this.handleInviteV2Messages(messages);
+    const result = messages.slice(existCount).reverse();
+    return result;
+  }
+
+  /**
    * 获取一组联系人的最后历史消息
    */
-  async getLastHistoryMessage(ctx: Context<{ linkmans: string[] }>) {
+  @SubscribeMessage('getLinkmansLastMessages')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(WsThrottlerGuard)
+  async getLinkmansLastMessages(
+    @MessageBody() ctx: Context<{ linkmans: string[] }>,
+  ) {
     if (isEmpty(ctx.data.linkmans)) {
       throw new WsException('联系人不能为空');
     }

@@ -7,6 +7,8 @@ export const ONE_DAY = 1000 * 60 * 60 * 24;
 /** 一年时间 */
 export const OneYear = 365 * 24 * 3600 * 1000;
 
+export const EachFetchMessagesCount = 30;
+
 /** 石头剪刀布, 用于随机生成结果 */
 export const RPS = ['石头', '剪刀', '布'];
 
