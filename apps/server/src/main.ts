@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
@@ -10,10 +9,6 @@ async function bootstrap() {
   // const redisIoAdapter = new RedisIoAdapter(app);
   // await redisIoAdapter.connectToRedis(process.env.REDIS_URL);
   // app.useWebSocketAdapter(redisIoAdapter);
-
-  app.useGlobalPipes(
-    new ValidationPipe({ transform: true, forbidUnknownValues: false }),
-  );
 
   app.enableCors({
     origin: '*',

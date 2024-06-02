@@ -9,6 +9,8 @@ import { JwtRegisterAsyncModule } from './constant/modules/jwt.module';
 import { ThrottlerForRootModule } from './constant/modules/throttler.module';
 import { MongooseForRootAsyncModule } from './constant/modules/mongoose.module';
 import { UserModule } from './user/user.module';
+import { APP_PIPE } from '@nestjs/core';
+import { ValidationPipe } from './pipes/validation.pipe';
 
 @Module({
   imports: [
@@ -21,6 +23,12 @@ import { UserModule } from './user/user.module';
     GroupModule,
     MessageModule,
     UserModule,
+  ],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
   ],
 })
 export class AppModule {}

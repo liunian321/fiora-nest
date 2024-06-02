@@ -29,6 +29,7 @@ module.exports = {
   ignorePatterns: ['.eslintrc.js'],
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/ban-types': 'off',
     'no-unused-vars': 'off',
     'import/order': [
       'error',

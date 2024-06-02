@@ -77,7 +77,9 @@ export class UserGateway {
       throw new WsException('注册功能已被禁用, 请联系管理员开通账号');
     }
 
-    const user = await this.userModel.findOne({ username: ctx.data.username });
+    const user = await this.userModel
+      .findOne({ username: ctx.data.username })
+      .exec();
     if (user) {
       throw new WsException('用户名已存在');
     }
@@ -194,7 +196,9 @@ export class UserGateway {
     @MessageBody()
     ctx: Context<{ username: string; password: string } & Environment>,
   ) {
-    const user = await this.userModel.findOne({ username: ctx.data.username });
+    const user = await this.userModel
+      .findOne({ username: ctx.data.username })
+      .exec();
     if (!user) {
       throw new WsException('用户不存在');
     }
@@ -304,7 +308,7 @@ export class UserGateway {
     @MessageBody()
     ctx: Context<{ oldPassword: string; newPassword: string }>,
   ) {
-    const user = await this.userModel.findOne({ _id: ctx.socket.user });
+    const user = await this.userModel.findOne({ _id: ctx.socket.user }).exec();
     if (!user) {
       throw new WsException('用户不存在');
     }
@@ -343,14 +347,16 @@ export class UserGateway {
   @UsePipes(new ValidationPipe({ transform: true }))
   @UseGuards(WsThrottlerGuard)
   async changeUsername(@MessageBody() ctx: Context<{ username: string }>) {
-    const user = await this.userModel.findOne({ _id: ctx.socket.user });
+    const user = await this.userModel.findOne({ _id: ctx.socket.user }).exec();
     if (!user) {
       throw new WsException('用户不存在');
     }
 
-    const isUsernameExist = await this.userModel.findOne({
-      username: ctx.data.username,
-    });
+    const isUsernameExist = await this.userModel
+      .findOne({
+        username: ctx.data.username,
+      })
+      .exec();
     if (isUsernameExist) {
       throw new WsException('用户名已存在');
     }
